@@ -1,29 +1,16 @@
 apply plugin: 'com.android.library'
-apply from: '../jacoco.gradle'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-beta5'
-    }
-}
 
 repositories {
     mavenCentral()
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    compileSdkVersion sdkTarget
+    buildToolsVersion toolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion minSdk
+        targetSdkVersion sdkTarget
     }
     buildTypes {
         release {

@@ -33,8 +33,8 @@ import java.util.Random;
 
 public class CardContainer extends AdapterView<ListAdapter> {
     public static final int INVALID_POINTER_ID = -1;
-    private int mActivePointerId = INVALID_POINTER_ID;
-    private static final double DISORDERED_MAX_ROTATION_RADIANS = Math.PI / 64;
+    protected int mActivePointerId = INVALID_POINTER_ID;
+    protected static final double DISORDERED_MAX_ROTATION_RADIANS = Math.PI / 64;
     private int mNumberOfCards = -1;
     private final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
@@ -50,10 +50,10 @@ public class CardContainer extends AdapterView<ListAdapter> {
             clearStack();
         }
     };
-    private final Random mRandom = new Random();
+    protected final Random mRandom = new Random();
     private final Rect boundsRect = new Rect();
-    private final Rect childRect = new Rect();
-    private final Matrix mMatrix = new Matrix();
+    protected final Rect childRect = new Rect();
+    protected final Matrix mMatrix = new Matrix();
 
 
     //TODO: determine max dynamically based on device speed
@@ -250,19 +250,20 @@ public class CardContainer extends AdapterView<ListAdapter> {
         if (mGestureDetector.onTouchEvent(event)) {
             return true;
         }
-        Log.d("Touch Event", MotionEvent.actionToString(event.getActionMasked()) + " ");
+//        Log.d("Touch Event", MotionEvent.actionToString(event.getActionMasked()) + " ");
         final int pointerIndex;
         final float x, y;
-        final float dx, dy;
+
+        float dx, dy;
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mTopCard.getHitRect(childRect);
 
                 pointerIndex = event.getActionIndex();
+                    try {
                 x = event.getX(pointerIndex);
                 y = event.getY(pointerIndex);
-
-                if (!childRect.contains((int) x, (int) y)) {
+                    } catch (Exception e) {
                     return false;
                 }
                 mLastTouchX = x;
@@ -285,6 +286,7 @@ public class CardContainer extends AdapterView<ListAdapter> {
 
                 dx = x - mLastTouchX;
                 dy = y - mLastTouchY;
+                dy = 0;
 
                 if (Math.abs(dx) > mTouchSlop || Math.abs(dy) > mTouchSlop) {
                     mDragging = true;
@@ -317,6 +319,33 @@ public class CardContainer extends AdapterView<ListAdapter> {
                         PropertyValuesHolder.ofFloat("pivotY", mTopCard.getHeight() / 2.f)
                 ).setDuration(250);
                 animator.setInterpolator(new AccelerateInterpolator());
+                animator.addListener(
+                        new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                mTopCard.setRotation(0);
+                                mTopCard.setPivotX(mTopCard.getWidth() / 2.0f);
+                                mTopCard.setPivotY(mTopCard.getHeight() / 2.0f);
+                                mTopCard.setTranslationX(0);
+                                mTopCard.setTranslationY(0);
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
+
+                            }
+                        }
+                );
                 animator.start();
                 break;
             case MotionEvent.ACTION_POINTER_UP:
@@ -357,8 +386,12 @@ public class CardContainer extends AdapterView<ListAdapter> {
                     cardModel.getOnClickListener().OnClickListener();
                 }
                 pointerIndex = event.getActionIndex();
-                x = event.getX(pointerIndex);
-                y = event.getY(pointerIndex);
+                try {
+                    x = event.getX(pointerIndex);
+                    y = event.getY(pointerIndex);
+                } catch (Exception e) {
+                    return false;
+                }
 
                 if (!childRect.contains((int) x, (int) y)) {
                     return false;
@@ -372,7 +405,8 @@ public class CardContainer extends AdapterView<ListAdapter> {
                 pointerIndex = event.findPointerIndex(mActivePointerId);
                 x = event.getX(pointerIndex);
                 y = event.getY(pointerIndex);
-                if (Math.abs(x - mLastTouchX) > mTouchSlop || Math.abs(y - mLastTouchY) > mTouchSlop) {
+//                if (Math.abs(x - mLastTouchX) > mTouchSlop || Math.abs(y - mLastTouchY) > mTouchSlop) {
+                if (Math.abs(x - mLastTouchX) > mTouchSlop) {
                     float[] points = new float[]{x - mTopCard.getLeft(), y - mTopCard.getTop()};
                     mTopCard.getMatrix().invert(mMatrix);
                     mMatrix.mapPoints(points);
