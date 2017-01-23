@@ -5,12 +5,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion sdkTarget
-    buildToolsVersion toolsVersion
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion minSdk
-        targetSdkVersion sdkTarget
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
     }
     buildTypes {
         release {
